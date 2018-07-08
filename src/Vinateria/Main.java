@@ -62,14 +62,15 @@ public class Main {
 	private JTextField txtBuscarproducto;
 	private JTextField txtTotal;
 	private JTable table;
-
+	public  Idioma idiom;
 	/**
 	 * Launch the application.
-	 */
+	 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					idiom = new Idioma("Español");
 					Main window = new Main();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
@@ -79,11 +80,11 @@ public class Main {
 		});
 	}
 
-	/**
+	
 	 * Create the application.
 	 */
-	public Main() {
-		initialize();
+	public Main(Idioma idiom) {
+		initialize(idiom);
 	}
 
 	/**
@@ -92,7 +93,7 @@ public class Main {
 	/**
 	 * 
 	 */
-	private void initialize() {
+	private void initialize(Idioma idiom) {
 		frame = new JFrame();
 		frame.setTitle("Menú");
 		frame.setVisible(true);
@@ -102,6 +103,8 @@ public class Main {
 		frame.setResizable(false);
 		frame.getContentPane().setBackground(new Color(32, 178, 170));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		System.out.println(idiom.getIdiomaActual());
 		
 		JButton btnAProducto = new JButton();
 		btnAProducto.setText("Agregar producto");
@@ -183,7 +186,7 @@ public class Main {
 		txtBuscarproducto.setText("BuscarProducto");
 		txtBuscarproducto.setColumns(10);
 		
-		JButton btnBusca = new JButton("Buscar");
+		JButton btnBusca = new JButton(idiom.getProperty("btnBusca"));
 		btnBusca.setMinimumSize(new Dimension(100, 30));
 		btnBusca.setBorder(new LineBorder(new Color(0, 0, 0)));
 		btnBusca.setBackground(Color.WHITE);
@@ -428,7 +431,8 @@ public class Main {
 			public void actionPerformed(ActionEvent arg0){
 				if (abrir == 0){
 					JOptionPane.showMessageDialog(null, "Hasta luego");
-					new Login().setVisible(true);
+					JOptionPane.showMessageDialog(null, "Hasta luego");
+					new Login().frame.setVisible(true);
 					abrir = 1;
 					new Menu().setVisible(false);
 					frame.dispose();
@@ -462,7 +466,16 @@ public class Main {
 		lblElijaUnaOpcion.setBounds(10, 521, 726, 22);
 		pnBienvenida.add(lblElijaUnaOpcion);
 		lblElijaUnaOpcion.setVerticalTextPosition(SwingConstants.TOP);
+
 		
+	}
+
+	public Idioma getIdiom() {
+		return idiom;
+	}
+
+	public void setIdiom(String idiom) {
+		this.idiom = new Idioma(idiom);
 	}
 	
 		
@@ -490,8 +503,6 @@ public class Main {
 			} catch (Exception e) {
 				System.out.println("func pdf error:\n"+e.getMessage());
 			}
-
 	}
 	*/
 }
-

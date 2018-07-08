@@ -68,7 +68,7 @@ public class mostrarTabla {
             Date fecha = new Date( cal.getTimeInMillis() );
             SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
             
-            Image img = Image.getInstance("src\\Vinateria\\Res\\Logo.png");
+            Image img = Image.getInstance("src\\Vinateria\\Res\\qr0.png");
             img.scalePercent(5);
             
             document.add(new Header("Vinateria Rocio", "Reporte de podructos disponibles en "+formato.format(fecha)));

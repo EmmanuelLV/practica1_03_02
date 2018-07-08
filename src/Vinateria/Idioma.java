@@ -6,12 +6,22 @@ import java.util.Properties;
 public class Idioma extends Properties{
 	private static final long serialVersionUID = 1L;
 	private String idiomaActual;
+	public String getIdiomaActual() {
+		return idiomaActual;
+	}
+
+	public void setIdiomaActual(String idiomaActual) {
+		this.idiomaActual = idiomaActual;
+	}
+
 	public Idioma(String idioma) {
 		switch (idioma) {
 		case "Español":
+			idiomaActual="Español";
 			getProperties("español.properties");
 			break;
 		case "Ingles":
+			idiomaActual="Ingles";
 			getProperties("ingles.properties");
 			break;
 		default:
