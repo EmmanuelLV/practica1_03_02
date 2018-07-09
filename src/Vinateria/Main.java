@@ -18,8 +18,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -27,7 +30,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.GroupLayout.Alignment;
+import javax.swing.InputMap;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TableModelEvent;
@@ -51,10 +56,7 @@ public class Main {
 
 	private JFrame frame;
 	public int abrir = 0;
-	private JTextField txtNombreproducto;
-	private JTextField txtIdProducto;
-	private JTextField txtPrecioventa;
-	private JTextField txtPreciocosto;
+	private JTextField txtCodigoBarras;
 	private JTextField txtTipoproducto;
 	private JPanel pnPuntoVenta;
 	private JPanel pnAgregarProducto;
@@ -63,6 +65,14 @@ public class Main {
 	private JTextField txtTotal;
 	private JTable table;
 	public  Idioma idiom;
+	private JTextField txtNombreproducto;
+	private JTable TablevistaProductos;
+	private JPanel pnConPro;
+	private String Comando= "Select idRECIBIDO,p.IdPRODUCTOS,nombre_p,TipoProducto,FechaRecibido,precioVenta,precioCosto,cantidad" + 
+			" FROM productoactual as pa" + 
+			" INNER JOIN PRODUCTOS AS p ON p.IdPRODUCTOS = pa.IdPRODUCTOS" + 
+			" WHERE borrado = 0;" + 
+			"";
 	/**
 	 * Launch the application.
 	 
@@ -120,6 +130,7 @@ public class Main {
 				if (!pnAgregarProducto.isVisible()){
 					pnAgregarProducto.setVisible(true);
 					pnPuntoVenta.setVisible(false);
+					pnConPro.setVisible(false);
 					//pnBienvenida.setVisible(false);
 				}else{
 					pnAgregarProducto.setVisible(false);
@@ -134,6 +145,7 @@ public class Main {
 				if (!pnPuntoVenta.isVisible()){
 					pnPuntoVenta.setVisible(true);
 					pnAgregarProducto.setVisible(false);
+					pnConPro.setVisible(false);
 					//pnBienvenida.setVisible(false);
 				}else{
 					pnPuntoVenta.setVisible(false);
@@ -158,6 +170,19 @@ public class Main {
 		btnSalir.setBorder(new LineBorder(new Color(255, 255, 255), 4));
 		
 		JButton btnProductos = new JButton();
+		btnProductos.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+					if (!pnConPro.isVisible()){
+						pnConPro.setVisible(true);
+						pnPuntoVenta.setVisible(false);
+						pnAgregarProducto.setVisible(false);
+						//pnBienvenida.setVisible(false);
+					}else{
+						pnConPro.setVisible(false);
+					}
+			}
+		});
 		btnProductos.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
@@ -170,12 +195,15 @@ public class Main {
 		btnProductos.setBounds(10, 251, 230, 100);
 		frame.getContentPane().add(btnProductos);
 		
+		pnConPro = new JPanel();
+		pnConPro.setVisible(false);
+		
 		
 		pnPuntoVenta = new JPanel();
+		pnPuntoVenta.setVisible(false);
 		pnPuntoVenta.setBackground(Color.WHITE);
 		pnPuntoVenta.setAutoscrolls(true);
 		pnPuntoVenta.setBounds(238, 11, 746, 599);
-		pnPuntoVenta.setVisible(false);
 		//---------------
 		frame.getContentPane().add(pnPuntoVenta);
 		
@@ -187,6 +215,26 @@ public class Main {
 		txtBuscarproducto.setColumns(10);
 		
 		JButton btnBusca = new JButton(idiom.getProperty("btnBusca"));
+		btnBusca.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String searchKey = txtBuscarproducto.getText();
+				String com = "Select idRECIBIDO,p.IdPRODUCTOS,nombre_p,TipoProducto,FechaRecibido,precioVenta,precioCosto,cantidad " + 
+						"FROM productoactual as pa " + 
+						"INNER JOIN PRODUCTOS AS p ON p.IdPRODUCTOS = pa.IdPRODUCTOS " + 
+						"WHERE borrado = 0 AND nombre_p like \"%"+searchKey+"%\" OR pa.IdPRODUCTOS = \""+searchKey+"\" OR TipoProducto like \"%"+searchKey+" %\";";
+				new mostrarTabla(table, com);
+				float a=0;
+				for (int i = 0; i < table.getModel().getRowCount(); i++) {
+					System.out.println( table.getModel().getValueAt(i, 5).toString());
+					 a += Float.parseFloat(table.getModel().getValueAt(i, 5).toString())* 
+							 Float.parseFloat(table.getModel().getValueAt(i, 7).toString());
+				}
+				a+=a*0.16;
+				txtTotal.setText(""+a);
+				
+			}
+		});
 		btnBusca.setMinimumSize(new Dimension(100, 30));
 		btnBusca.setBorder(new LineBorder(new Color(0, 0, 0)));
 		btnBusca.setBackground(Color.WHITE);
@@ -198,26 +246,23 @@ public class Main {
 		txtTotal.setText("Total");
 		txtTotal.setColumns(10);
 		
-		JButton button_1 = new JButton("Regresar");
-		button_1.setMinimumSize(new Dimension(100, 30));
-		button_1.setBorder(new LineBorder(new Color(0, 0, 0)));
-		button_1.setBackground(Color.WHITE);
+		JButton btnRegre = new JButton("Regresar");
+
+		btnRegre.setMinimumSize(new Dimension(100, 30));
+		btnRegre.setBorder(new LineBorder(new Color(0, 0, 0)));
+		btnRegre.setBackground(Color.WHITE);
 		
 		JButton btnPdf = new JButton("PDF");
 		btnPdf.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				mostrarTabla.pdftabla(table.getModel());
+				
 			}
 		});
 		btnPdf.setMinimumSize(new Dimension(100, 30));
 		btnPdf.setBorder(new LineBorder(new Color(0, 0, 0)));
 		btnPdf.setBackground(Color.WHITE);
-		
-		JButton btnRegresarr = new JButton("Regresar");
-		btnRegresarr.setMinimumSize(new Dimension(100, 30));
-		btnRegresarr.setBorder(new LineBorder(new Color(0, 0, 0)));
-		btnRegresarr.setBackground(Color.WHITE);
 		GroupLayout gl_pnPuntoVenta = new GroupLayout(pnPuntoVenta);
 		gl_pnPuntoVenta.setHorizontalGroup(
 			gl_pnPuntoVenta.createParallelGroup(Alignment.LEADING)
@@ -236,19 +281,17 @@ public class Main {
 									.addGap(18)
 									.addComponent(txtTotal, GroupLayout.PREFERRED_SIZE, 124, GroupLayout.PREFERRED_SIZE))
 								.addGroup(gl_pnPuntoVenta.createSequentialGroup()
-									.addComponent(btnRegresarr, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
-									.addGap(212)
 									.addComponent(btnPdf, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE)
-									.addGap(214)
-									.addComponent(button_1, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))))
+									.addGap(516)
+									.addComponent(btnRegre, GroupLayout.PREFERRED_SIZE, 100, GroupLayout.PREFERRED_SIZE))))
 						.addGroup(gl_pnPuntoVenta.createSequentialGroup()
 							.addGap(28)
 							.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 694, GroupLayout.PREFERRED_SIZE)))
-					.addContainerGap(753, Short.MAX_VALUE))
+					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		gl_pnPuntoVenta.setVerticalGroup(
-			gl_pnPuntoVenta.createParallelGroup(Alignment.TRAILING)
-				.addGroup(Alignment.LEADING, gl_pnPuntoVenta.createSequentialGroup()
+			gl_pnPuntoVenta.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_pnPuntoVenta.createSequentialGroup()
 					.addGap(29)
 					.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 374, GroupLayout.PREFERRED_SIZE)
 					.addGap(18)
@@ -264,23 +307,27 @@ public class Main {
 							.addGap(2)
 							.addComponent(txtTotal, GroupLayout.PREFERRED_SIZE, 27, GroupLayout.PREFERRED_SIZE)))
 					.addGap(80)
-					.addGroup(gl_pnPuntoVenta.createParallelGroup(Alignment.LEADING)
-						.addComponent(btnRegresarr, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnPdf, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-						.addComponent(button_1, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
-					.addContainerGap(362, Short.MAX_VALUE))
+					.addGroup(gl_pnPuntoVenta.createParallelGroup(Alignment.BASELINE)
+						.addComponent(btnRegre, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+						.addComponent(btnPdf, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+					.addContainerGap(38, Short.MAX_VALUE))
 		);
 		
 		table = new JTable() {
 			@Override
 			public boolean isCellEditable(int row,int column) {
-				if(column == 0)
+				if(column == 0 || column == 1)
 					return false;
 				else
 					return true;
 			};
 		};
-		mostrarTabla mosTabla = new mostrarTabla(table);
+		
+		
+
+		
+
+		mostrarTabla mosTabla = new mostrarTabla(table,Comando);
 		table.getModel().addTableModelListener(new TableModelListener () {
 			@Override
 			public void tableChanged(TableModelEvent e) {
@@ -288,18 +335,32 @@ public class Main {
                 System.out.println(table.getModel().getColumnName(e.getColumn()));
 				
                 System.out.println("last" +e.getType()+" "+e.getColumn()+" "+e.getLastRow());
-                String id="'"+table.getModel().getValueAt(e.getLastRow(), 0)+"'";
+                String id="idRECIBIDO='"+table.getModel().getValueAt(e.getLastRow(), 0)+"'";
                 String dato = "'"+table.getModel().getValueAt(e.getLastRow(), e.getColumn())+"'";
                 String columnName = table.getModel().getColumnName(e.getColumn());
+                
+                String tabla = "productoactual";
+                if (columnName.equals("TipoProducto") || columnName.equals("IDProducto") || columnName.equals("nombre_p")) {
+					tabla = "productos"; 
+					id="idPRODUCTOS='"+table.getModel().getValueAt(e.getLastRow(), 1)+"'";
+				}
                 try {
-					Conexion.update("aeropuerto", columnName+"="+dato,"idAEROPUERTO="+id);
+					Conexion.update(tabla, columnName+"="+dato,id);
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+
+			}
 			
-			} 
 			});
+		int con = JComponent.WHEN_IN_FOCUSED_WINDOW;
+		InputMap inputMap = table.getInputMap(con);
+		ActionMap actionMap = table.getActionMap();
+		
+		
+		
+		
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -307,7 +368,143 @@ public class Main {
 			}
 		});
 		scrollPane_1.setViewportView(table);
+
 		pnPuntoVenta.setLayout(gl_pnPuntoVenta);
+		pnConPro.setBackground(Color.WHITE);
+		pnConPro.setBounds(236, 11, 746, 599);
+		frame.getContentPane().add(pnConPro);
+		pnConPro.setLayout(null);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(24, 44, 701, 544);
+		scrollPane.setAutoscrolls(true);
+		pnConPro.add(scrollPane);
+		
+		TablevistaProductos = new JTable() {@Override
+			public boolean isCellEditable(int row,int column) {
+				if(column == 0 || column == 1)
+					return false;
+				else	
+					return true;
+				};
+			};
+			
+			
+			
+			
+			TablevistaProductos = new JTable() {
+				@Override
+				public boolean isCellEditable(int row,int column) {
+					if(column == 0 || column == 1)
+						return false;
+					else
+						return true;
+				};
+			};
+			
+			
+
+			
+			
+			mostrarTabla mosTableVista = new mostrarTabla(TablevistaProductos,Comando);
+			TablevistaProductos.getModel().addTableModelListener(new TableModelListener () {
+				@Override
+				public void tableChanged(TableModelEvent e) {
+					// TODO Auto-generated method stub
+	                System.out.println(TablevistaProductos.getModel().getColumnName(e.getColumn()));
+					
+	                System.out.println("last" +e.getType()+" "+e.getColumn()+" "+e.getLastRow());
+	                String id="idRECIBIDO='"+TablevistaProductos.getModel().getValueAt(e.getLastRow(), 0)+"'";
+	                String dato = "'"+TablevistaProductos.getModel().getValueAt(e.getLastRow(), e.getColumn())+"'";
+	                String columnName = TablevistaProductos.getModel().getColumnName(e.getColumn());
+	                
+	                String tabla = "productoactual";
+	                if (columnName.equals("TipoProducto") || columnName.equals("IDProducto") || columnName.equals("nombre_p")) {
+						tabla = "productos"; 
+						id="idPRODUCTOS='"+TablevistaProductos.getModel().getValueAt(e.getLastRow(), 1)+"'";
+					}
+	                try {
+						Conexion.update(tabla, columnName+"="+dato,id);
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+				}
+				
+				});
+			
+			
+			  InputMap inMap = TablevistaProductos.getInputMap(con);
+			  ActionMap actMap = TablevistaProductos.getActionMap();
+
+			  // DELETE is a String constant that for me was defined as "Delete"
+			  inMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "DELETE");
+			  actMap.put("DELETE", new AbstractAction() {
+			     public void actionPerformed(ActionEvent e) {
+			    	 String set = "borrado = 1";
+			    	 String id = ""+TablevistaProductos.getModel().getValueAt(TablevistaProductos.getSelectedRow(), 0);
+			    	 try {
+						Conexion.update("productoActual", set, "idRecibido ="+id);
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+			    	 new mostrarTabla(TablevistaProductos,Comando);
+			     }
+			  });
+			  
+			
+			
+			
+			TablevistaProductos.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					System.out.println(TablevistaProductos.getValueAt(TablevistaProductos.getSelectedRow(), 0));
+				}
+			});
+
+			
+			btnRegre.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					mostrarTabla as = new mostrarTabla(TablevistaProductos, Comando);
+					
+				}
+			});
+		scrollPane.setViewportView(TablevistaProductos);
+		
+		
+		  int condition = JComponent.WHEN_IN_FOCUSED_WINDOW;
+
+		  // DELETE is a String constant that for me was defined as "Delete"
+		  inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "DELETE");
+		  actionMap.put("DELETE", new AbstractAction() {
+		     public void actionPerformed(ActionEvent e) {
+		    	 String set = "borrado = 1";
+		    	 String id = ""+table.getModel().getValueAt(table.getSelectedRow(), 0);
+		    	 try {
+					Conexion.update("productoActual", set, "idRecibido ="+id);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		    	 new mostrarTabla(table,Comando);
+		     }
+		  });
+		
+		btnSalir.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0){
+				if (abrir == 0){
+					JOptionPane.showMessageDialog(null, "Hasta luego");
+					JOptionPane.showMessageDialog(null, "Hasta luego");
+					new Login().frame.setVisible(true);
+					abrir = 1;
+					frame.dispose();
+					abrir = 0;
+				}
+			}
+		});
 		
 		pnAgregarProducto = new JPanel();
 		pnAgregarProducto.setVisible(false);
@@ -338,60 +535,28 @@ public class Main {
 		pnAgregarProducto.add(txtNombreproducto, gbc_txtNombreproducto);
 		txtNombreproducto.setColumns(10);
 		
-		JLabel lblIdDelProducto = new JLabel("Id del producto");
-		GridBagConstraints gbc_lblIdDelProducto = new GridBagConstraints();
-		gbc_lblIdDelProducto.insets = new Insets(0, 0, 5, 5);
-		gbc_lblIdDelProducto.gridx = 3;
-		gbc_lblIdDelProducto.gridy = 6;
-		pnAgregarProducto.add(lblIdDelProducto, gbc_lblIdDelProducto);
+		JLabel lblCodigoBarras = new JLabel("Codigo de barras");
+		GridBagConstraints gbc_lblCodigoBarras = new GridBagConstraints();
+		gbc_lblCodigoBarras.insets = new Insets(0, 0, 5, 5);
+		gbc_lblCodigoBarras.gridx = 3;
+		gbc_lblCodigoBarras.gridy = 6;
+		pnAgregarProducto.add(lblCodigoBarras, gbc_lblCodigoBarras);
 		
-		txtIdProducto = new JTextField();
-		txtIdProducto.setText("\r\n");
-		GridBagConstraints gbc_txtIdProducto = new GridBagConstraints();
-		gbc_txtIdProducto.insets = new Insets(0, 0, 5, 5);
-		gbc_txtIdProducto.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtIdProducto.gridx = 6;
-		gbc_txtIdProducto.gridy = 6;
-		pnAgregarProducto.add(txtIdProducto, gbc_txtIdProducto);
-		txtIdProducto.setColumns(10);
-		
-		JLabel lblPrecioVenta = new JLabel("Precio venta");
-		GridBagConstraints gbc_lblPrecioVenta = new GridBagConstraints();
-		gbc_lblPrecioVenta.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPrecioVenta.gridx = 3;
-		gbc_lblPrecioVenta.gridy = 8;
-		pnAgregarProducto.add(lblPrecioVenta, gbc_lblPrecioVenta);
-		
-		txtPrecioventa = new JTextField();
-		GridBagConstraints gbc_txtPrecioventa = new GridBagConstraints();
-		gbc_txtPrecioventa.insets = new Insets(0, 0, 5, 5);
-		gbc_txtPrecioventa.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtPrecioventa.gridx = 6;
-		gbc_txtPrecioventa.gridy = 8;
-		pnAgregarProducto.add(txtPrecioventa, gbc_txtPrecioventa);
-		txtPrecioventa.setColumns(10);
-		
-		JLabel lblPrecioCosto = new JLabel("Precio costo");
-		GridBagConstraints gbc_lblPrecioCosto = new GridBagConstraints();
-		gbc_lblPrecioCosto.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPrecioCosto.gridx = 3;
-		gbc_lblPrecioCosto.gridy = 10;
-		pnAgregarProducto.add(lblPrecioCosto, gbc_lblPrecioCosto);
-		
-		txtPreciocosto = new JTextField();
-		GridBagConstraints gbc_txtPreciocosto = new GridBagConstraints();
-		gbc_txtPreciocosto.insets = new Insets(0, 0, 5, 5);
-		gbc_txtPreciocosto.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtPreciocosto.gridx = 6;
-		gbc_txtPreciocosto.gridy = 10;
-		pnAgregarProducto.add(txtPreciocosto, gbc_txtPreciocosto);
-		txtPreciocosto.setColumns(10);
+		txtCodigoBarras = new JTextField();
+		txtCodigoBarras.setText("\r\n");
+		GridBagConstraints gbc_txtCodigoBarras = new GridBagConstraints();
+		gbc_txtCodigoBarras.insets = new Insets(0, 0, 5, 5);
+		gbc_txtCodigoBarras.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtCodigoBarras.gridx = 6;
+		gbc_txtCodigoBarras.gridy = 6;
+		pnAgregarProducto.add(txtCodigoBarras, gbc_txtCodigoBarras);
+		txtCodigoBarras.setColumns(10);
 		
 		JLabel lblTipoProducto = new JLabel("Tipo Producto");
 		GridBagConstraints gbc_lblTipoProducto = new GridBagConstraints();
 		gbc_lblTipoProducto.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTipoProducto.gridx = 3;
-		gbc_lblTipoProducto.gridy = 12;
+		gbc_lblTipoProducto.gridy = 8;
 		pnAgregarProducto.add(lblTipoProducto, gbc_lblTipoProducto);
 		
 		txtTipoproducto = new JTextField();
@@ -399,7 +564,7 @@ public class Main {
 		gbc_txtTipoproducto.insets = new Insets(0, 0, 5, 5);
 		gbc_txtTipoproducto.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txtTipoproducto.gridx = 6;
-		gbc_txtTipoproducto.gridy = 12;
+		gbc_txtTipoproducto.gridy = 8;
 		pnAgregarProducto.add(txtTipoproducto, gbc_txtTipoproducto);
 		txtTipoproducto.setColumns(10);
 		
@@ -418,6 +583,21 @@ public class Main {
 		pnAgregarProducto.add(btnRegresar, gbc_btnRegresar);
 		
 		JButton btnRegistrar = new JButton("Registrar");
+		btnRegistrar.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String noPro = "'"+txtNombreproducto.getText()+"'";
+				String idP = "'"+txtCodigoBarras.getText()+"'";
+				String tipoPro = "'"+txtTipoproducto.getText()+"'";
+				try {
+					Conexion.insertar("productos", "nombre_p,CodigoDeBarras,TipoProducto", noPro+","+idP+","+tipoPro);
+				} catch (SQLException e1) {
+					LoginNoExist al = new LoginNoExist("Llene los campos");
+					al.setVisible(true);
+					e1.printStackTrace();
+				}
+			}
+		});
 		btnRegistrar.setMinimumSize(new Dimension(100, 30));
 		btnRegistrar.setBorder(new LineBorder(new Color(0, 0, 0)));
 		btnRegistrar.setBackground(Color.WHITE);
@@ -426,20 +606,6 @@ public class Main {
 		gbc_btnRegistrar.gridx = 7;
 		gbc_btnRegistrar.gridy = 18;
 		pnAgregarProducto.add(btnRegistrar, gbc_btnRegistrar);
-		
-		btnSalir.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent arg0){
-				if (abrir == 0){
-					JOptionPane.showMessageDialog(null, "Hasta luego");
-					JOptionPane.showMessageDialog(null, "Hasta luego");
-					new Login().frame.setVisible(true);
-					abrir = 1;
-					new Menu().setVisible(false);
-					frame.dispose();
-					abrir = 0;
-				}
-			}
-		});
 		
 		
 		
@@ -477,32 +643,4 @@ public class Main {
 	public void setIdiom(String idiom) {
 		this.idiom = new Idioma(idiom);
 	}
-	
-		
-	
-		
-		 /*
-		private void pdf() {
-			String ruta = "C:\\Users\\Emmanuel\\QrProyecto\\";
-			String valor = "hola";
-			
-			//Codigo para la hora actual
-			DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-			Date today = Calendar.getInstance().getTime();
-			String reportDate = df.format(today);
-			System.out.println("Report date: "+reportDate);
-			try {
-				FileOutputStream archivo = new FileOutputStream(ruta+"archivo.pdf");
-				com.itextpdf.text.Document doc = new com.itextpdf.text.Document();
-				PdfWriter.getInstance(doc, archivo);
-				doc.open();
-				doc.add(new Paragraph(reportDate+"\n\n"));
-				doc.close();
-				JOptionPane.showMessageDialog(null, "PDF Generado correctamente");
-				
-			} catch (Exception e) {
-				System.out.println("func pdf error:\n"+e.getMessage());
-			}
-	}
-	*/
 }

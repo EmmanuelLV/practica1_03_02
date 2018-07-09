@@ -12,9 +12,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
+
+import database.Conexion;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JMenuBar;
@@ -23,14 +29,28 @@ import javax.swing.JMenu;
 import javax.swing.JCheckBoxMenuItem;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.Insets;
+import java.awt.TrayIcon.MessageType;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class Login {
 	public Idioma idiom;
 	public JFrame frame;
 	private JPasswordField pwdContrasea;
-
+	
+	final int caracter = 20;
+	final int caracter2 = 5;
+	private JLabel jlbUsuario;
+	private JLabel lblPass;
+	private JButton btnEntrar;
+	private JMenu mnIdioma;
+	private JMenuItem mntmIngles;
+	private JMenuItem mntmEspaol;
+	private JMenu mnAccesibiladad;
+	private JMenuItem mntmMonochromatismo;
 	/**
 	 * Launch the application.
 	 */
@@ -77,13 +97,48 @@ public class Login {
 		jlbUsuario.setBounds(340, 54, 212, 20);
 	
 		JTextField jtxUsuario = new JTextField();
+		jtxUsuario.setBackground(Color.white);
+		jtxUsuario.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (validar(jtxUsuario.getText(), "^([A-Z || 0-9]){9}?$")) {
+					jtxUsuario.setBackground(new Color(152, 251, 152));
+					btnEntrar.setEnabled(true);
+				}else{
+					jtxUsuario.setBackground(new Color(250, 128, 114));
+					btnEntrar.setEnabled(false);
+				}
+			}
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if (jtxUsuario.getText().length() > 8) {
+					e.consume();
+					LoginNoExist lb = new LoginNoExist("La contraseña no puede ser mas larga");
+					lb.setVisible(true);
+				}
+			}
+		});
 		jtxUsuario.setBounds(350, 85, 150, 20);
-		jtxUsuario.setText("luisangel@login.es");
+		jtxUsuario.setText("JBH100395");
 		frame.getContentPane().add(jtxUsuario);
 		jtxUsuario.setVisible(true);
 		jtxUsuario.setToolTipText(idiom.getProperty("jtxUsuarioTooltip"));
 		
 		pwdContrasea = new JPasswordField();
+		pwdContrasea.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if (pwdContrasea.getText().length() > 7) {
+					e.consume();
+					LoginNoExist lb = new LoginNoExist("La contraseña no puede ser mas larga");
+					lb.setVisible(true);
+				}
+			}
+		});
 		pwdContrasea.setBounds(350, 138, 150, 20);
 		frame.getContentPane().add(pwdContrasea);
 		
@@ -148,9 +203,15 @@ public class Login {
 				String myLogin = jtxUsuario.getText().trim ();
 				String myPass = new String (pwdContrasea.getPassword()).trim();
 				System.out.println(idiom.getIdiomaActual()+"|");
-				int siPass = verificapass(myLogin, myPass);
-				
-				if (siPass == 1){
+				Boolean siPass = false;
+				try {
+					siPass = verificapass(myLogin, myPass);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println(siPass);
+				if (siPass){
 					frame.setVisible(false);
 					frame.dispose();
 					//abrir=0;
@@ -165,19 +226,7 @@ public class Login {
 	cambiarTexto();
 
 		
-}
-	
-		final int caracter = 20;
-		final int caracter2 = 5;
-		private JLabel jlbUsuario;
-		private JLabel lblPass;
-		private JButton btnEntrar;
-		private JMenu mnIdioma;
-		private JMenuItem mntmIngles;
-		private JMenuItem mntmEspaol;
-		private JMenu mnAccesibiladad;
-		private JMenuItem mntmMonochromatismo;
-		
+}		
 		private void cambiarTexto() {
 			jlbUsuario.setText(idiom.getProperty("loginUsuario"));
 			lblPass.setText(idiom.getProperty("loginContrasena"));
@@ -191,16 +240,21 @@ public class Login {
 			
 		}
 		
-		private int verificapass(String login, String password){
-			if (login.contains("@")){
-			}else
-				JOptionPane.showMessageDialog(null, idiom.getProperty("noCorreoMessageDi"));
-			if (password.length() <= caracter && password.length() >= caracter2){ 
-			}else
-				JOptionPane.showMessageDialog(null, idiom.getProperty("nologin"));
-			if (login.equals("luisangel@login.es") && password.equals("luis123")){
-				JOptionPane.showMessageDialog(null, idiom.getProperty("silogin"));
-				return 1;
-			}	return 0;
+		private boolean verificapass(String login, String password) throws SQLException{
+			 ResultSet Rs = Conexion.select("RFC,Contraseña","empleados");
+			 System.out.println("|"+login+"|"+password+"|");
+			 while (Rs.next()) {
+				 System.out.println(Rs.getString("RFC")+" "+Rs.getString("Contraseña"));
+				if (Rs.getString("RFC").equals(login) && Rs.getString("Contraseña").equals(password)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		private boolean validar(String cadena,String regex) {
+			if(cadena.matches(regex))
+			return true;
+			return false;
 		}
 }

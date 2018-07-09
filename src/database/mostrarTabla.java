@@ -25,18 +25,22 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 public class mostrarTabla {
-	public mostrarTabla(JTable table) {
+	public mostrarTabla(JTable table,String Comando) {
 		DefaultTableModel modelo = new DefaultTableModel();
-		ResultSet rs = Conexion.getTabla("Select * from aeropuerto");
-		modelo.setColumnIdentifiers(new Object[]{"ID","Ciudad","Nombre","pais"});
+		ResultSet rs = Conexion.getTabla(Comando);
+		modelo.setColumnIdentifiers(new Object[]{"IDRECIBIDO","IDProducto","nombre_p","TipoProducto","FechaRecibido","precioVenta","precioCosto","cantidad"});
 		try {
 			while(rs.next()) {
 				modelo.addRow(new Object[] 
 						{
-								rs.getString("idAEROPUERTO"),
-								rs.getString("ciudad"),
-								rs.getString("nombre_a"),
-								rs.getString("pais"),
+								rs.getString("idRECIBIDO"),
+								rs.getString("p.IdPRODUCTOS"),
+								rs.getString("nombre_p"),
+								rs.getString("TipoProducto"),
+								rs.getString("FechaRecibido"),
+								rs.getFloat("precioVenta"),
+								rs.getFloat("precioCosto"),
+								rs.getInt("cantidad")
 						}
 				);
 			}
