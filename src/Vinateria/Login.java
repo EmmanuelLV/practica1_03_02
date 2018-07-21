@@ -104,10 +104,8 @@ public class Login {
 			public void keyReleased(KeyEvent e) {
 				if (validar(jtxUsuario.getText(), "^([A-Z || 0-9]){9}?$")) {
 					jtxUsuario.setBackground(new Color(152, 251, 152));
-					btnEntrar.setEnabled(true);
 				}else{
 					jtxUsuario.setBackground(new Color(250, 128, 114));
-					btnEntrar.setEnabled(false);
 				}
 			}
 			@Override
@@ -120,7 +118,6 @@ public class Login {
 			}
 		});
 		jtxUsuario.setBounds(350, 85, 150, 20);
-		jtxUsuario.setText("JBH100395");
 		frame.getContentPane().add(jtxUsuario);
 		jtxUsuario.setVisible(true);
 		jtxUsuario.setToolTipText(idiom.getProperty("jtxUsuarioTooltip"));
@@ -214,12 +211,7 @@ public class Login {
 				if (siPass){
 					frame.setVisible(false);
 					frame.dispose();
-					//abrir=0;
 					Main main = new Main(idiom);
-
-					//main.setIdiom(idiom.getIdiomaActual());
-//					main.getFrame().setVisible(true);
-					//abrir=1;
 				}	
 			}
 		});
@@ -237,24 +229,27 @@ public class Login {
 			mntmEspaol.setText(idiom.getProperty("mntmEspaol"));
 			mnAccesibiladad.setText(idiom.getProperty("mnAccesibiladad"));
 			mntmMonochromatismo.setText(idiom.getProperty(""));
-			
 		}
 		
 		private boolean verificapass(String login, String password) throws SQLException{
+			try {
 			 ResultSet Rs = Conexion.select("RFC,Contraseña","empleados");
-			 System.out.println("|"+login+"|"+password+"|");
 			 while (Rs.next()) {
-				 System.out.println(Rs.getString("RFC")+" "+Rs.getString("Contraseña"));
-				if (Rs.getString("RFC").equals(login) && Rs.getString("Contraseña").equals(password)) {
+				 //System.out.println(Rs.getString("RFC")+" "+Rs.getString("Contraseña"));
+				if (Rs.getString("RFC").equals(login) && Rs.getString("Contraseña").equals(password))
 					return true;
-				}
+			 }
+			}catch (SQLException e) {
+				e.printStackTrace();
+				new LoginNoExist("No hay conexión a la base de datos").setVisible(true);
+				System.out.println("no conexion");
 			}
 			return false;
 		}
 		
 		private boolean validar(String cadena,String regex) {
 			if(cadena.matches(regex))
-			return true;
+				return true;
 			return false;
 		}
 }

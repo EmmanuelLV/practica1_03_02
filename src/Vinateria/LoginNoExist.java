@@ -38,14 +38,17 @@ public class LoginNoExist extends JDialog {
 	 * Create the dialog.
 	 */
 	public LoginNoExist(String mensaje) {
+		getContentPane().setBackground(Color.ORANGE);
+		setBackground(Color.WHITE);
 		setUndecorated(true);
-		setBounds(100, 100, 358, 143);
+		setBounds(100, 100, 369, 150);
 		getContentPane().setLayout(null);
+		setLocationRelativeTo(null);
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setAlignmentX(Component.RIGHT_ALIGNMENT);
 			buttonPane.setBorder(new LineBorder(new Color(32, 178, 170), 6, true));
-			buttonPane.setBounds(0, 111, 357, 32);
+			buttonPane.setBounds(6, 114, 357, 32);
 			buttonPane.setBackground(new Color(32, 178, 170));
 			getContentPane().add(buttonPane);
 			buttonPane.setLayout(null);
@@ -70,7 +73,7 @@ public class LoginNoExist extends JDialog {
 				getRootPane().setDefaultButton(okButton);
 			}
 		}
-		contentPanel.setBounds(0, 0, 357, 118);
+		contentPanel.setBounds(6, 5, 357, 118);
 		contentPanel.setBackground(Color.WHITE);
 		contentPanel.setBorder(new LineBorder(new Color(32, 178, 170), 5, true));
 		getContentPane().add(contentPanel);

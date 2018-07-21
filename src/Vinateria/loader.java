@@ -84,7 +84,7 @@ public class loader {
 							}
 							timer.stop();
 							Login l = new Login();
-							l.setVisible(true);
+							
 							loader.getFrames()[0].setVisible(false);
 						}
 
@@ -136,7 +136,6 @@ public class loader {
 				}
 				timer.stop();
 				Login l = new Login();
-				l.setVisible(true);
 				loader.setVisible(false);
 			}
 			return null;
