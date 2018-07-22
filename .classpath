@@ -4,5 +4,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="C:/lib/iText-5.0.5.jar"/>
 	<classpathentry kind="lib" path="C:/lib/mysql-connector-java-5.1.46-bin.jar"/>
+	<classpathentry kind="lib" path="C:/lib/barcode.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

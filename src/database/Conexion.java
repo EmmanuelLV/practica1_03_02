@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import com.mysql.jdbc.PreparedStatement;
 
 public class Conexion {
-	private static String db = "gestion_vuelos";
+	private static String db = "Vinateria";
 	private static String user = "root";
 	private static String pass = "";
 	private static String host = "localhost";
@@ -78,14 +78,18 @@ public class Conexion {
 		con.close();
 	}
 	
-	public static void select(String fields, String table_name) throws SQLException{
+	public static ResultSet select(String fields, String table_name) throws SQLException{
 		Connection con = getConnection();
 		String query = "SELECT "+fields+" FROM "+table_name;
-		Statement st = (Statement) con.createStatement();//Abrir consulta
-		ResultSet rs = ((java.sql.Statement) st).executeQuery(query);
-		
-		System.out.println(rs.getArray(1));
-		rs.close();
+		java.sql.Statement st = con.createStatement();//Abrir consulta
+		ResultSet rs = null;
+		try {
+			st= con.createStatement();
+			rs=st.executeQuery(query);
+		} catch (SQLException e) {
+			System.out.println(e.toString());
+		}
+		return rs;
 	}
 	
 	
